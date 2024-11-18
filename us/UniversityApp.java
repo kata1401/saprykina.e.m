@@ -1,3 +1,4 @@
+
 package us;
 
 import javax.swing.*;
@@ -11,11 +12,7 @@ public class UniversityApp extends JFrame {
     private JTextArea outputArea;
 
     public UniversityApp() {
-        try {
-            dbManager = new DatabaseManager("jdbc:mysql://localhost:3306/UN", "root", "1234");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        dbManager = new DatabaseManager(new DatabaseConnector());
 
         setTitle("Университетская система");
         setSize(800, 800);
@@ -272,4 +269,3 @@ public class UniversityApp extends JFrame {
         SwingUtilities.invokeLater(UniversityApp::new);
     }
 }
-
