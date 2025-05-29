@@ -6,6 +6,7 @@ public class Model {
 
     public double calculate(String input) throws Exception {
         input = input.replaceAll("\\s+", "");
+        checkParentheses(input);
 
         Stack<Double> numbers = new Stack<>();
         Stack<Character> operators = new Stack<>();
@@ -20,7 +21,7 @@ public class Model {
                     number.append(currentChar);
                     i++;
                 }
-                while (i < input.length() && Character.isDigit(input.charAt(i))) {
+                while (i < input.length() && (Character.isDigit(input.charAt(i)) || input.charAt(i) == '.')) {
                     number.append(input.charAt(i));
                     i++;
                 }
@@ -32,22 +33,32 @@ public class Model {
                 while (!operators.isEmpty() && operators.peek() != '(') {
                     numbers.push(applyOperation(operators.pop(), numbers.pop(), numbers.pop()));
                 }
+                if (operators.isEmpty()) {
+                    throw new Exception("Несоответствующие скобки");
+                }
                 operators.pop();
                 i++;
-            } else {
+            } else if (isOperator(currentChar)) {
                 while (!operators.isEmpty() && precedence(currentChar) <= precedence(operators.peek())) {
                     numbers.push(applyOperation(operators.pop(), numbers.pop(), numbers.pop()));
                 }
                 operators.push(currentChar);
                 i++;
+            } else {
+                throw new Exception("Недопустимый символ: " + currentChar);
             }
         }
+
 
         while (!operators.isEmpty()) {
             numbers.push(applyOperation(operators.pop(), numbers.pop(), numbers.pop()));
         }
 
         return numbers.pop();
+    }
+
+    private boolean isOperator(char c) {
+        return c == '+' || c == '-' || c == '*' || c == '/' || c == '^';
     }
 
     private int precedence(char operator) {
@@ -58,6 +69,8 @@ public class Model {
             case '*':
             case '/':
                 return 2;
+            case '^':
+                return 3;
             default:
                 return 0;
         }
@@ -72,10 +85,29 @@ public class Model {
             case '*':
                 return a * b;
             case '/':
-                if (b == 0) throw new Exception("Division by zero.");
+                if (b == 0) throw new Exception("Деление на ноль");
                 return a / b;
+            case '^':
+                return Math.pow(a, b);
             default:
-                throw new Exception("Invalid operator");
+                throw new Exception("Неверный оператор: " + operator);
+        }
+    }
+
+    private void checkParentheses(String input) throws Exception {
+        Stack<Character> stack = new Stack<>();
+        for (char c : input.toCharArray()) {
+            if (c == '(') {
+                stack.push(c);
+            } else if (c == ')') {
+                if (stack.isEmpty()) {
+                    throw new Exception("Несоответствующие скобки");
+                }
+                stack.pop();
+            }
+        }
+        if (!stack.isEmpty()) {
+            throw new Exception("Несоответствующие скобки");
         }
     }
 }
